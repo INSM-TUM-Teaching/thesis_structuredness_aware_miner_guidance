@@ -15,7 +15,24 @@ from flex_compare.ui.tabs import fragebogen, log_and_arm, miners as miners_tab
 DEFAULT_LOG_DIR = PROJECT_ROOT / "data" / "with-case-ids"
 
 
+def _default_selected_log(log_dir: Path) -> str | None:
+    """First ``*.xes`` in ``log_dir`` (sorted), or ``None`` if there are none."""
+    if not log_dir.is_dir():
+        return None
+    logs = sorted(log_dir.glob("*.xes"))
+    return str(logs[0]) if logs else None
+
+
 def render(state: FlexState) -> html.Div:
+    # Tab-2 runs go through LOG_PATH_STORE, which mirrors ``state.selected_log``.
+    # When nothing is persisted yet it is ``None``, and every Tab-2 Run / Run-all
+    # click silently no-ops (the callbacks guard on a falsy log) with no feedback
+    # — which reads as "the buttons don't work". Seed the first available log so
+    # the dropdowns and the store are populated on load and the run buttons work
+    # immediately. The Questionnaire tab is unaffected (it uses per-class logs).
+    if not state.selected_log:
+        state.selected_log = _default_selected_log(DEFAULT_LOG_DIR)
+
     return html.Div(
         style={"fontFamily": "IBM Plex Sans, system-ui, sans-serif",
                "background": "var(--bg-page, #f9fafb)", "minHeight": "100vh"},
