@@ -13,7 +13,7 @@ questionnaire from the evaluation.
 |-----------|------------|----------------|
 | [`questionnaire_prototype/`](questionnaire_prototype/) | The prototype tool (Flex Compare): a standalone web app that classifies a log, runs miners on it, compares the models, and scores each miner against a structuredness class. | Chapter 6, Implementation |
 | [`phase_b_results/`](phase_b_results/) | The Phase B miner runs. Self-contained HTML reports of the models discovered by the three construction-set miners (IMf, FusionMINERful, MINERful) across the event-log corpus. | Chapter 5, empirical grounding |
-| [`miner_questionaire_results/`](miner_questionaire_results/) | The filled-in questionnaire scores from the evaluation, one PDF per miner (InductiveMiner, FusionMINERful, HeuristicsMiner). | Chapter 7, Evaluation |
+| [`miner_questionnaire_results/`](miner_questionnaire_results/) | The filled-in questionnaire scores from the evaluation, one PDF per miner (InductiveMiner, FusionMINERful, HeuristicsMiner). | Chapter 7, Evaluation |
 
 `index.html` at the repository root is a small landing page linking the three Phase B
 model reports.
@@ -51,7 +51,7 @@ browser:
 - `FusionMinerful.html` (FusionMINERful, hybrid)
 - `Minerful.html` (MINERful, declarative)
 
-### `miner_questionaire_results/` (evaluation answers)
+### `miner_questionnaire_results/` (evaluation answers)
 
 The questionnaire applied and scored, exported as one PDF per miner. These record the
 theoretical and empirical fit per structuredness class produced by the instrument during
@@ -62,6 +62,14 @@ the items and scoring logic transfer unchanged:
 - `FusionMINERful.pdf`
 - `HeuristicsMiner.pdf` (evaluation miner, outside the construction set)
 
+
+## AI assistance
+
+Parts of the software and documentation in this repository were developed with the
+assistance of AI tools (Anthropic's Claude). All content was reviewed and is the
+responsibility of the author. This note concerns the repository artifacts only; the
+formal declaration on the use of AI tools for the thesis itself follows the TUM
+requirements and is provided in the thesis document.
 
 ## License
 
