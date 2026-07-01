@@ -65,11 +65,11 @@ the items and scoring logic transfer unchanged:
 
 ## AI assistance
 
-Parts of the software and documentation in this repository were developed with the
-assistance of AI tools (Anthropic's Claude). All content was reviewed and is the
-responsibility of the author. This note concerns the repository artifacts only; the
-formal declaration on the use of AI tools for the thesis itself follows the TUM
-requirements and is provided in the thesis document.
+Parts of the code, along with other software and documentation in this repository,
+were written with the assistance of AI tools (Anthropic's Claude). All content was
+reviewed and is the responsibility of the author. This note concerns the repository
+artifacts only; the formal declaration on the use of AI tools for the thesis itself
+follows the TUM requirements and is provided in the thesis document.
 
 ## License
 
