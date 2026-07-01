@@ -1,0 +1,197 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Questionnaire — SEMI-STRUCTURED class · T+E architecture · [ALIGNED-OVERLEAF]
+# ─────────────────────────────────────────────────────────────────────────────
+# Wording/scales aligned 1:1 with the FINAL instrument in the thesis:
+#   chapters/05_characteristics.tex, Section "The questionnaire"
+#   (sec:final-questionnaire; SSOT push 2026-06-20). Aligned 2026-06-26.
+#
+# Changes vs. the previous [AI-DRAFT] line (2026-06-20):
+#   - Phase T: a-priori IN item (T-Sm-IN-1) REMOVED. Phase T is now
+#     {BQ-1, BQ-2, SF-1}, max 3. Order BQ-1, BQ-2, SF-1 (per the final tables).
+#   - Phase E: the E-Sm-Gate and E-Sm-SF-1 were REMOVED. Phase E is now the
+#     four items {BQ-1, BQ-2, IN-1, IN-2}, max 8 (was max 10 with gate+SF).
+#   - All question text and 2/1/0 anchors replaced with the final wording.
+#   - phase_t_seed values were re-derived to the new wording. Entries marked
+#     "[verify]" are auto-aligned and need a human a-priori review.
+#
+# Split candidates (SSOT): T-Sm-SF-1, T-Sm-BQ-1, T-Sm-BQ-2 — flagged, not split.
+#
+# NOTE: the YAML keys ``value: ja|nein`` are kept as internal data tokens
+# (validator + scoring code rely on them). Display labels are English.
+
+meta:
+  class: semi
+  label: Semi-Structured
+  status: '[ALIGNED-OVERLEAF 2026-07-01]'
+  source: chapters/05_characteristics.tex · sec:final-questionnaire
+  phase_t_max: 3
+  phase_e_max: 8
+  combination:
+    mode: weighted
+    borderline_margin: 10
+    note: 'Equal weight per item: Fit = 3/7·Tfit + 4/7·Efit (3 T-items, 4 E-items).'
+stufe1:
+- id: S1.1
+  kind: paradigm
+  sf: SF-1
+  question: Which modeling paradigm does the miner follow per its specification — imperative, declarative,
+    or hybrid?
+  note: Pre-pended context field, no score.
+- id: S1.3
+  kind: differentiation
+  question: Does the miner have a mechanism that differentiates locally and switches modeling mode (e.g.
+    a segmentation / zoning parameter)?
+  answers:
+  - Yes (which one)
+  - 'No'
+  note: Suggests Semi suitability but is not evidence. Unscored.
+phase_t:
+- id: T-Sm-BQ-1
+  axis: BQ
+  title: Fixed local ordering mechanism
+  measure: Can enforce fixed local orderings on part of the behavior
+  question: Does the selected setup document a mechanism that can enforce fixed local orderings on part
+    of the behavior, rather than applying a single uniform level of restriction across the model?
+  doku_hint: Whether the setup can fix local orderings on part of the behavior instead of one uniform
+    restriction level across the model.
+  allow_nz: false
+  split_candidate: true
+  scale:
+  - value: ja
+    label: can enforce fixed local orderings on part of the behavior
+  - value: nein
+    label: only a single uniform level of restriction across the model
+  phase_t_seed:
+    imp:
+      value: nein
+      note: previously scored for differential/region-bound restriction; re-derive. [verify 2026-07-01]
+    fus:
+      value: ja
+      note: previously scored for differential/region-bound restriction; re-derive. [verify 2026-07-01]
+    decl:
+      value: nein
+      note: previously scored for differential/region-bound restriction; re-derive. [verify 2026-07-01]
+    pm4-heuristics:
+      value: nein
+      note: previously scored for differential/region-bound restriction; re-derive. [verify 2026-07-01]
+- id: T-Sm-BQ-2
+  axis: BQ
+  title: Open/unordered mechanism
+  measure: Can leave part of the behavior open or unordered
+  question: Does the selected setup document a mechanism that can leave part of the behavior open or unordered
+    within the same model?
+  doku_hint: Whether the setup can leave part of the behavior open or unordered within the same model.
+  allow_nz: false
+  split_candidate: true
+  scale:
+  - value: ja
+    label: can leave part of the behavior open or unordered within the model
+  - value: nein
+    label: cannot leave behavior open / forces a single order
+  phase_t_seed:
+    imp:
+      value: ja
+      note: previously scored for documented replayability guarantee; re-derive. [verify 2026-07-01]
+    fus:
+      value: ja
+      note: previously scored for documented replayability guarantee; re-derive. [verify 2026-07-01]
+    decl:
+      value: ja
+      note: previously scored for documented replayability guarantee; re-derive. [verify 2026-07-01]
+    pm4-heuristics:
+      value: nein
+      note: previously scored for documented replayability guarantee; re-derive. [verify 2026-07-01]
+- id: T-Sm-SF-1
+  axis: SF
+  title: Fixed and open dependencies side by side
+  measure: Carries both portions in one model
+  question: Can the output notation represent fixed and open dependencies side by side within one model?
+  doku_hint: Whether the notation can carry fixed and open dependencies together (hybrid capability).
+  allow_nz: false
+  split_candidate: true
+  scale:
+  - value: ja
+    label: represents fixed and open dependencies side by side in one model
+  - value: nein
+    label: cannot represent both in one model
+  phase_t_seed:
+    imp:
+      value: nein
+      note: Single-mode (imperative only) — cannot carry both; not documented → No.
+    fus:
+      value: ja
+      note: Hybrid with a zoning component (Declare/IM fusion).
+    decl:
+      value: nein
+      note: Single-mode (declarative only) — cannot carry both; not documented → No.
+    pm4-heuristics:
+      value: nein
+      note: Single-mode (imperative) — cannot carry both; not documented → No.
+phase_e_gate: null
+phase_e:
+- id: E-Sm-BQ-1
+  axis: BQ
+  title: Fixed internal order of stable fragments
+  measure: Fragment-internal order preserved
+  question: Does the model keep the internal order of the stable fragments fixed, rejecting internal reorderings
+    the log never shows?
+  route: Model read across stable and flexible regions.
+  metric_keys: []
+  allow_nz: false
+  scale:
+  - score: 2
+    label: fragment-internal order preserved; unshown internal reorderings are rejected
+  - score: 1
+    label: fragments largely preserved; some unshown internal reorderings are admitted
+  - score: 0
+    label: fragment-internal order dissolved; the activities sit in a free-choice or parallel block that
+      admits many unshown orders
+- id: E-Sm-BQ-2
+  axis: BQ
+  title: Open admission of fragment recombinations
+  measure: Recombinations beyond the observed order, observed ones still replayable
+  question: Does the model admit fragment recombinations beyond the single observed order, while still
+    replaying the observed ones?
+  route: Metric where computable (fitness / trace fit); else model read.
+  metric_keys:
+  - replay_fitness
+  - non_vacuous_satisfaction_rate
+  allow_nz: false
+  scale:
+  - score: 2
+    label: observed arrangements replay, and recombinations consistent with the fragments but not seen
+      in the log are admitted
+  - score: 1
+    label: observed arrangements replay, but no unobserved recombination is admitted
+  - score: 0
+    label: only one arrangement replays; other observed arrangements are rejected
+- id: E-Sm-IN-1
+  axis: IN
+  title: Distinguishability of regions
+  measure: Region boundary visibility
+  question: Are the stable and flexible reference regions distinguishable in the output?
+  route: Observation of zone/region boundaries on the model.
+  metric_keys: []
+  allow_nz: false
+  scale:
+  - score: 2
+    label: both region types clearly locatable
+  - score: 1
+    label: distinction only partly readable
+  - score: 0
+    label: no recognizable boundary
+- id: E-Sm-IN-2
+  axis: IN
+  title: Integrated readability
+  measure: Connected whole across regions
+  question: Is the output readable as one connected model across stable and flexible regions?
+  route: Observation across the whole model.
+  metric_keys: []
+  allow_nz: false
+  scale:
+  - score: 2
+    label: one connected whole; stable and flexible parts can be read together without overload
+  - score: 1
+    label: connected, but dense or laboriously readable
+  - score: 0
+    label: fragmented, or so overloaded that the stable and flexible parts cannot be read as one model
