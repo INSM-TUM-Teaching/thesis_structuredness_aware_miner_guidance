@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import platform
 import shutil
 import subprocess
 import xml.etree.ElementTree as ET
@@ -24,9 +25,35 @@ JAVA_SRC_DIR = PACKAGE_ROOT / "java" / "src" / "main" / "java"
 JAVA_BUILD_DIR = PACKAGE_ROOT / "java" / "build" / "classes"
 LOCK_PATH = PACKAGE_ROOT / "prom-lock.json"
 VENDOR_DIR = PACKAGE_ROOT / "vendor" / "prom-packages"
-_LPSOLVE_ARM64_NATIVE_DIR = PACKAGE_ROOT / "java" / "native" / "lpsolve-macos-arm64"
+_LPSOLVE_NATIVE_ROOT = PACKAGE_ROOT / "java" / "native"
+_LPSOLVE_ARM64_NATIVE_DIR = _LPSOLVE_NATIVE_ROOT / "lpsolve-macos-arm64"
 _LPSOLVE_HOMEBREW_LIB_DIR = Path("/opt/homebrew/opt/lp_solve/lib")
-LPSOLVE_NATIVE_DIR = _LPSOLVE_ARM64_NATIVE_DIR
+
+
+def _default_lpsolve_native_dir() -> Path:
+    """Directory holding the lp_solve JNI native library for this platform.
+
+    Honors the ``LPSOLVE_NATIVE_DIR`` env override (analogous to ``ARM_BINARY``
+    for the ARM classifier). Otherwise falls back to a per-platform folder under
+    ``java/native/``. Only the macOS-arm64 library is checked in; on Windows and
+    Linux the matching folder must be populated with a native lp_solve 5.5 build
+    (``lpsolve55j.dll`` + ``lpsolve55.dll`` on Windows, ``liblpsolve55j.so`` on
+    Linux), or ``LPSOLVE_NATIVE_DIR`` must point at one. If the directory does
+    not exist it is simply dropped from ``LPSOLVE_LIBRARY_PATHS`` below, so the
+    rest of the app is unaffected and only FusionMINERful fails to find the solver.
+    """
+    override = os.environ.get("LPSOLVE_NATIVE_DIR")
+    if override:
+        return Path(override)
+    system = platform.system()
+    if system == "Windows":
+        return _LPSOLVE_NATIVE_ROOT / "lpsolve-windows-x64"
+    if system == "Linux":
+        return _LPSOLVE_NATIVE_ROOT / "lpsolve-linux-x64"
+    return _LPSOLVE_ARM64_NATIVE_DIR  # Darwin (and any other) -> bundled macOS-arm64
+
+
+LPSOLVE_NATIVE_DIR = _default_lpsolve_native_dir()
 LPSOLVE_LIBRARY_PATHS = tuple(
     path
     for path in (LPSOLVE_NATIVE_DIR, _LPSOLVE_HOMEBREW_LIB_DIR)

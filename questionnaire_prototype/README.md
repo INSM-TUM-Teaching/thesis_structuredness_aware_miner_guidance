@@ -269,21 +269,79 @@ in Tab 1, discover and compare models in Tab 2, score a miner against a class in
 | `FLEX_PROJECT_ROOT` | repo root | override where `tools/`, `.miner_cache/`, `.flex_compare/` live |
 | `FLEX_RUN_CONCURRENCY` | `3` | max simultaneous miner runs from *Run all* |
 | `FLEX_COMPARE_LOG_LEVEL` | `INFO` | Python logging level |
+| `ARM_BINARY` | bundled path | absolute path to the ARM classifier binary (needed on non-macOS, e.g. `matrix_classifier.exe`) |
+| `LPSOLVE_NATIVE_DIR` | per-platform folder | directory holding the lp_solve JNI native library for FusionMINERful |
 
 ### Platform note (macOS-arm64 binaries)
 
-Two checked-in native binaries are built for **macOS-arm64** and must be rebuilt on other
-platforms:
+The pure-Python/Dash app and the Java **MINERful** miner (a plain `.jar`) are
+platform-independent. Two checked-in native binaries, however, are built for
+**macOS-arm64** and must be rebuilt or replaced on other platforms:
 
 - `tools/automated-process-classification/target/release/matrix_classifier` (ARM
-  classifier, Rust),
+  classifier, Rust) — used by the Tab 1 classification,
 - `flex_compare/internal/fusion_miner/java/native/lpsolve-macos-arm64/liblpsolve55j.jnilib`
-  (lp_solve native lib for FusionMINERful).
+  (lp_solve native lib) — used by **FusionMINERful**.
+
+Without these two, the rest of the app still starts, but Tab 1 classification and the
+FusionMINERful miner will not run.
 
 The ProM package closure is pinned by
 `flex_compare/internal/fusion_miner/prom-lock.json`. If you need to re-hydrate it offline,
 run `python -m flex_compare.internal.fusion_miner.runtime --download-archives`. See
 [`SETUP.md`](SETUP.md) for the full platform details.
+
+### Running on Windows
+
+The tool is not distributed as a double-click executable — it is a Python web app you run
+from a terminal. The Python core, the Dash UI, and MINERful work on Windows once **Python
+≥ 3.11** and a **JDK 11** are installed. The install differs from the macOS instructions
+above only in venv activation:
+
+```powershell
+cd questionnaire_prototype
+python -m venv .venv
+.venv\Scripts\activate
+pip install -e .[dev]
+
+python -m flex_compare.app        # http://127.0.0.1:8502
+```
+
+To get the two native components working on Windows:
+
+1. **ARM classifier (Tab 1).** Install the [Rust toolchain](https://rustup.rs/) and
+   rebuild the binary — on Windows this produces `matrix_classifier.exe`:
+
+   ```powershell
+   cd tools\automated-process-classification
+   cargo build --release
+   ```
+
+   The default lookup path has no `.exe` suffix, so point the app at the rebuilt binary
+   via the `ARM_BINARY` environment variable (supported directly in
+   [`arm_runner.py`](flex_compare/internal/shared/arm_runner.py)):
+
+   ```powershell
+   $env:ARM_BINARY = "$PWD\target\release\matrix_classifier.exe"
+   ```
+
+2. **lp_solve for FusionMINERful.** Download the Windows lp_solve 5.5 build from
+   <https://sourceforge.net/projects/lpsolve/> and put `lpsolve55.dll` and `lpsolve55j.dll`
+   into a folder. The native-library resolution in
+   [`runtime.py`](flex_compare/internal/fusion_miner/runtime.py) is platform-aware: on
+   Windows it looks in `flex_compare/internal/fusion_miner/java/native/lpsolve-windows-x64`
+   by default, or in whatever directory the `LPSOLVE_NATIVE_DIR` environment variable
+   points at. Either drop the two DLLs into that `lpsolve-windows-x64` folder, or set the
+   override:
+
+   ```powershell
+   $env:LPSOLVE_NATIVE_DIR = "C:\path\to\lpsolve\dlls"
+   ```
+
+   Because the JVM also searches the system `PATH` for JNI libraries on Windows, adding the
+   DLL folder to `PATH` works as well. This path is untested on Windows — the selection
+   logic is in place, but a working end-to-end FusionMINERful run has only been verified on
+   macOS-arm64. MINERful, ARM, and the imperative miners are unaffected.
 
 ---
 
